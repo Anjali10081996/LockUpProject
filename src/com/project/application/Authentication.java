@@ -2,8 +2,11 @@ package com.project.application;
 import com.project.model.Users;
 import com.project.model.fileNames;
 import com.project.model.UserCredentials;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,6 +44,7 @@ public class Authentication {
 	public static void signInOptions() {
 		System.out.println("1 . Registration ");
 		System.out.println("2 . Login ");
+		System.out.println("3.  Exist");
 		int option = keyboard.nextInt();
 		switch(option) {
 			case 1 : 
@@ -48,6 +52,10 @@ public class Authentication {
 				break;
 			case 2 :
 				loginUser();
+				break;
+			case 3 :
+				System.out.println("Application is closed successfully!");
+				exit(0);
 				break;
 			default :
 				System.out.println("Please select 1 Or 2");
@@ -57,6 +65,11 @@ public class Authentication {
 		input.close();
 	}
 	
+	private static void exit(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public static void lockerOptions(String inpUsername) {
 		System.out.println("1 . FETCH ALL STORED CREDENTIALS ");
 		System.out.println("2 . STORED CREDENTIALS ");
@@ -86,18 +99,38 @@ public class Authentication {
 		System.out.println("*					*");
 		System.out.println("==========================================");
 		
+		
 		System.out.println("Enter Username :");
 		String username = keyboard.next();
 		users.setUsername(username);
 		
+		//check if user is already registered
+		boolean found = false;
+		while(input.hasNext() && !found) {
+			if(input.next().equals(username)) {
+					found = true;
+					break;
+				}
+			else {
+				input.next();
+			}
+		}
+		
+		
+		if(!found)
+		{
 		System.out.println("Enter Password :");
 		String password = keyboard.next();
 		users.setPassword(password);
 		
 		output.println(users.getUsername());
 		output.println(users.getPassword());
-		
 		System.out.println("User Registration Suscessful !");
+		}
+		else {
+			System.out.println("User already exists !");
+		}
+		
 		output.close();
 		
 	}
@@ -146,7 +179,6 @@ public class Authentication {
 		System.out.println("*   WELCOME TO DIGITAL LOCKER STORE YOUR CREDS HERE	 *");
 		System.out.println("*					*");
 		System.out.println("==========================================");
-		
 		boolean found = false;
 		while(lockerInput.hasNext() && !found) {
 			if(lockerInput.next().equals(loggedInUser)) {
@@ -167,6 +199,27 @@ public class Authentication {
 		String siteName = keyboard.next();
 		userCredentials.setSiteName(siteName);
 		
+		//check if user credential for specific site present or not
+		boolean present = false;
+		File userFile = new File(path+loggedInUser);
+		try {
+			fileInput = new Scanner(userFile);
+		} catch (FileNotFoundException e) {
+			
+			e.printStackTrace();
+		}
+		while(fileInput.hasNext() && !present) {
+			if(fileInput.next().equals(siteName) )
+			{
+			System.out.println("Site Name: "+ siteName +" is already present!");
+			present = true;
+			}
+			
+		}
+		
+		    
+		if(!present)
+		{
 		System.out.println("Enter Username :");
 		String username = keyboard.next();
 		userCredentials.setUsername(username);
@@ -186,8 +239,10 @@ public class Authentication {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+		fileOutput.close();	
+		}
+		fileInput.close();
 		
-		fileOutput.close();		
 	}
 	
 	//creating locker file for new users
@@ -228,6 +283,13 @@ public class Authentication {
 			File  userFile = new File(path+inpUsername);
 			try {
 				fileInput = new Scanner(userFile);
+				 while(fileInput.hasNext()){
+						System.out.println("Site Name: "+fileInput.next());
+						System.out.println("User Name: "+fileInput.next());
+						System.out.println("User Password: "+fileInput.next());
+						
+						present = true;	
+					}	
 			} catch (FileNotFoundException e) {
 			
 				e.printStackTrace();
@@ -235,13 +297,7 @@ public class Authentication {
 			break;
 			}
 		}
-		    while(fileInput.hasNext()){
-				System.out.println("Site Name: "+fileInput.next());
-				System.out.println("User Name: "+fileInput.next());
-				System.out.println("User Password: "+fileInput.next());
-				
-				present = true;	
-			}	
+		   
 		
 		if(!present)
 		{
@@ -256,9 +312,10 @@ public class Authentication {
     	while(lockerInput.hasNext()) {
 			if(lockerInput.next().equals(inpUsername) && !present)
 			{
-			File  userFile = new File(path+inpUsername);
-			userFile.delete();
-			lockerInput.toString().trim();
+			  File  userFile = new File(path+inpUsername);
+			  userFile.delete();
+			
+				lockerOutput.toString().trim();
 			present = true;
 			System.out.println("UserName: "+inpUsername+" file has been deleted");
 			break;
